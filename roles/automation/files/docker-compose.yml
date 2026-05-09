@@ -1,0 +1,32 @@
+services:
+  n8n:
+    image: docker.io/n8nio/n8n:latest
+    container_name: n8n
+    restart: unless-stopped
+    ports:
+      - "5678:5678"
+    environment:
+      - N8N_HOST=localhost
+      - N8N_PORT=5678
+      - N8N_PROTOCOL=http
+      - NODE_ENV=production
+      - WEBHOOK_URL=http://localhost:5678/
+      - GENERIC_TIMEZONE=Africa/Johannesburg
+      - N8N_EMAIL_MODE=smtp
+      - N8N_SMTP_HOST=smtp.gmail.com
+      - N8N_SMTP_PORT=465
+      - N8N_SMTP_USER=skaderlab@gmail.com
+      - N8N_SMTP_PASS=ytiz haem dgtv rudh
+      - N8N_SMTP_SENDER=skaderlab@gmail.com
+      - N8N_SMTP_SSL=true
+    volumes:
+      - n8n_data:/home/node/.n8n
+    networks:
+      - n8n
+
+volumes:
+  n8n_data:
+
+networks:
+  n8n:
+    driver: bridge

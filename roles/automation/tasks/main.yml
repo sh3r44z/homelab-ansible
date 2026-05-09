@@ -1,1 +1,36 @@
+- name: Ensure n8n directory exists
+  file:
+    path: /home/{{ ansible_user }}/projects/infrastructure/n8n
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  become: yes
 
+- name: Copy docker-compose file
+  copy:
+    src: docker-compose.yml
+    dest: /home/{{ ansible_user }}/projects/infrastructure/n8n/docker-compose.yml
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  become: yes 
+
+
+- name: Start n8n stack
+  community.docker.docker_compose_v2:
+    project_src: /home/{{ ansible_user }}/projects/infrastructure/n8n
+    state: present
+  become: yes
+
+
+- name: Verify n8n is running
+  command: docker compose ps
+  args:
+    chdir: /home/{{ ansible_user }}/projects/infrastructure/n8n
+  register: compose_status
+  changed_when: false
+
+- name: Print n8n status
+  debug:
+    msg: "{{ compose_status.stdout }}"
