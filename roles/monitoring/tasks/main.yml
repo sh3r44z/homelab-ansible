@@ -1,1 +1,79 @@
+- name: Ensure monitoring directory exists
+  file:
+    path: /home/{{ ansible_user }}/projects/infrastructure/monitoring
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  become: yes
 
+- name: Ensure prometheus directory exists
+  file:
+    path: /home/{{ ansible_user }}/projects/infrastructure/monitoring/prometheus
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  become: yes
+
+- name: Ensure alertmanager directory exists
+  file:
+    path: /home/{{ ansible_user }}/projects/infrastructure/monitoring/alertmanager
+    state: directory
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0755'
+  become: yes
+
+- name: Copy docker-compose file
+  copy:
+    src: docker-compose.yml
+    dest: /home/{{ ansible_user }}/projects/infrastructure/monitoring/docker-compose.yml
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  become: yes
+
+- name: Copy Prometheus config
+  copy:
+    src: prometheus.yml
+    dest: /home/{{ ansible_user }}/projects/infrastructure/monitoring/prometheus/prometheus.yml
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  become: yes
+
+- name: Copy alert rules
+  copy:
+    src: alerts.yml
+    dest: /home/{{ ansible_user }}/projects/infrastructure/monitoring/prometheus/alerts.yml
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  become: yes
+
+- name: Copy Alertmanager config
+  copy:
+    src: alertmanager.yml
+    dest: /home/{{ ansible_user }}/projects/infrastructure/monitoring/alertmanager/alertmanager.yml
+    owner: "{{ ansible_user }}"
+    group: "{{ ansible_user }}"
+    mode: '0644'
+  become: yes
+
+- name: Start monitoring stack
+  community.docker.docker_compose_v2:
+    project_src: /home/{{ ansible_user }}/projects/infrastructure/monitoring
+    state: present
+  become: yes
+
+- name: Verify stack is running
+  command: docker compose ps
+  args:
+    chdir: /home/{{ ansible_user }}/projects/infrastructure/monitoring
+  register: compose_status
+  changed_when: false
+
+- name: Print stack status
+  debug:
+    msg: "{{ compose_status.stdout }}"
