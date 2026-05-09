@@ -1,0 +1,5 @@
+- name: Server Setup SPeedrun 
+  hosts: homelab
+  roles:
+    - base
+    - docker

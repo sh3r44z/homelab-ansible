@@ -1,0 +1,73 @@
+- name: Update apt cache 
+  apt:
+    update_cache: yes
+    cache_valid_time: 3000
+  become: yes
+
+- name: Install essential packages 
+  apt: 
+    name:
+      - curl
+      - wget
+      - git 
+      - htop
+      - ufw
+      - fail2ban
+      - unattended-upgrades
+    state: present
+  become: yes
+
+- name: Set timezone to Africa/Johannesburg
+  timezone:
+    name: Africa/Johannesburg
+  become: yes
+
+- name: Allow SSH through firewall 
+  ufw:
+    rule: allow 
+    port: "22"
+    proto: tcp 
+  become: yes
+
+- name: Allow HTTPS through firewall 
+  ufw: 
+    rule: allow 
+    port: "80"
+    proto: tcp
+  become: yes
+
+- name: Allow Grafana through firewall 
+  ufw:
+    rule: allow
+    port: "3030"
+    proto: tcp 
+  become: yes
+
+- name: Enable UFW firewall 
+  ufw:
+    state: enabled
+    policy: deny
+  become: yes
+
+- name: Enable fail2ban
+  systemd:
+    name: fail2ban
+    enabled: yes 
+    state: started 
+  become: yes 
+
+- name: Harden SSH config 
+  lineinfile:
+      path: /etc/ssh/ssh_config
+      regexp: "{{item.regexp}}"
+      line: "{{item.regexp}}"
+      state: present
+  loop:
+    - { regexp: '^PermitRootLogin', line: 'PermitRootLogin no'}
+    - { regexp: '^PasswordAuthentication', line: 'PasswordAuthentication no'}
+    - { regexp: '^X11Forwarding', line: 'X11Forwarding no'}
+  become: yes
+  notify: restart ssh 
+
+- name: Restart SSH handler 
+  meta: flush_handlers
