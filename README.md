@@ -12,7 +12,7 @@ ansible-playbook -i inventory.ini site.yml --ask-become-pass
 
 ---
 
-## What is ti
+## What is it
 
 A fully automated server provisioning system that SSHes into a target machine and brings it to a known, consistent state regardless of whether that machine is brand new or has been running for months.
 
